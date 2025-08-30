@@ -1,0 +1,28 @@
+{
+	"name": "securesign-digital-platform",
+	"version": "1.0.0",
+	"description": "Plataforma moderna e segura para assinatura digital de documentos",
+	"author": "Armando Capita <armandomateus41@gmail.com>",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Armandomateus41/digital_frontend.git"
+	},
+	"keywords": ["digital-signature", "react", "typescript", "tailwindcss", "vite"],
+	"engines": {
+		"node": ">=18.0.0",
+		"pnpm": ">=8.0.0"
+	},
+	"devDependencies": {
+		"concurrently": "^9.2.1"
+	},
+	"scripts": {
+		"dev": "pnpm -C frontend dev",
+		"dev:all": "concurrently -n bff,spa -c blue,green \"pnpm -C server dev\" \"pnpm -C frontend dev\"",
+		"build": "pnpm -C frontend build && pnpm -C server build",
+		"build:frontend": "pnpm -C frontend build",
+		"start": "node server/dist/index.js",
+		"test:e2e": "pnpm -C frontend exec playwright test -c ../tests/playwright.config.ts",
+		"promote:admin": "node scripts/promote-admin.js"
+	}
+}
