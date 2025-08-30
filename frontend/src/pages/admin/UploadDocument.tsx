@@ -8,7 +8,7 @@ import Label from '../../components/ui/Label'
 import { Card, CardContent } from '../../components/ui/Card'
 import Toast from '../../components/Toast'
 import { apiPostForm } from '../../lib/http'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 const schema = z.object({
   title: z.string().min(1, 'Título obrigatório'),
@@ -18,6 +18,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 export default function UploadDocument() {
+  const navigate = useNavigate()
   const [toast, setToast] = useState<string | undefined>()
   const {
     register,
@@ -67,7 +68,17 @@ export default function UploadDocument() {
             </div>
 
             {/* Botão Sair */}
-            <Button variant="ghost" className="text-gray-600 hover:text-gray-900">
+            <Button
+              variant="ghost"
+              className="text-gray-600 hover:text-gray-900"
+              onClick={async () => {
+                try {
+                  await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
+                } catch {}
+                localStorage.removeItem('accessToken')
+                navigate('/admin/login', { replace: true })
+              }}
+            >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
@@ -97,7 +108,7 @@ export default function UploadDocument() {
         </div>
 
         {/* Conteúdo Principal */}
-        <div className="max-w-2xl">
+        <div className="max-w-2xl mx-auto">
           <Card className="shadow-lg border-0">
             <CardContent className="p-8">
               {/* Título da Seção */}
