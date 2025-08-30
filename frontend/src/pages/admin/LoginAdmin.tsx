@@ -8,7 +8,7 @@ import Label from '../../components/ui/Label'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card'
 import Logo from '../../components/Logo'
 import Toast from '../../components/Toast'
-import { apiPost } from '../../lib/http'
+import { apiGet, apiPost } from '../../lib/http'
 import { useNavigate, Link } from 'react-router-dom'
 
 const schema = z.object({
@@ -34,12 +34,8 @@ export default function LoginAdmin() {
       if (accessToken) {
         localStorage.setItem('accessToken', accessToken)
       }
-      // Buscar a sessão com Authorization Bearer para decidir redirect
-      const res = await fetch('/api/auth/session', {
-        credentials: 'include',
-        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
-      })
-      const data = await res.json()
+      // Buscar a sessão para decidir redirect (usa base configurada)
+      const data = (await apiGet('/auth/session')) as any
       if (data?.role === 'ADMIN') navigate('/admin/documents/new', { replace: true })
       else navigate('/admin/signatures', { replace: true })
     } catch (e: any) {

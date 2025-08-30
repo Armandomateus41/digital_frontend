@@ -13,10 +13,9 @@ export function useSession() {
   return useQuery<Session>({
     queryKey: ['session'],
     queryFn: async () => {
-      const token = typeof localStorage !== 'undefined' ? localStorage.getItem('accessToken') : null
-      const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {}
-      const res = await fetch('/api/auth/session', { credentials: 'include', headers, cache: 'no-store' })
-      return (await res.json()) as Session
+      // usa cliente http centralizado (já injeta headers e base URL)
+      const s = await apiGet<Session>('/auth/session')
+      return s
     },
     staleTime: 0,
     refetchOnMount: 'always',
