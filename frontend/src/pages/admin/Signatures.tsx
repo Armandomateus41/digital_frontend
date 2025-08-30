@@ -124,7 +124,7 @@ export default function Signatures() {
         <AddSignerModal
           documentId={addModal.documentId}
           onClose={() => setAddModal(null)}
-          onSubmit={async (p) => { await createSigner.mutateAsync({ documentId: addModal.documentId, name: p.name, cpf: p.cpf }) }}
+          onSubmit={(p) => createSigner.mutateAsync({ documentId: addModal.documentId, name: p.name, cpf: p.cpf }).then(() => undefined)}
           name={newName}
           setName={setNewName}
           cpf={newCpf}
