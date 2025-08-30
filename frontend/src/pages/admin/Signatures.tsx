@@ -26,6 +26,7 @@ export default function Signatures() {
   const [viewModalDocId, setViewModalDocId] = useState<string | null>(null)
   const [addModal, setAddModal] = useState<{ documentId: string } | null>(null)
   const [signModal, setSignModal] = useState<{ documentId: string; signer?: Signer } | null>(null)
+  const [detailsDoc, setDetailsDoc] = useState<DocRow | null>(null)
   const [newName, setNewName] = useState('')
   const [newCpf, setNewCpf] = useState('')
   const { data, isLoading } = useQuery<DocRow[]>({
@@ -76,7 +77,7 @@ export default function Signatures() {
         </THead>
         <TBody>
           {data.map((d) => (
-            <TR key={`${d.documentId}-${d.hash}`}>
+            <TR key={`${d.documentId}-${d.hash}`} onClick={() => setDetailsDoc(d)}>
               <TD className="font-mono">{d.documentId}</TD>
               <TD>{d.name}</TD>
               <TD>{new Date(d.date).toLocaleString()}</TD>
@@ -137,6 +138,26 @@ export default function Signatures() {
             await signMutation.mutateAsync({ signatureId: signModal.signer.id, documentId: signModal.documentId })
           }}
         />
+      )}
+      {detailsDoc && (
+        <Modal
+          open
+          onClose={() => setDetailsDoc(null)}
+          title={detailsDoc.name}
+          description={<span className="text-xs text-gray-500">ID {detailsDoc.documentId}</span>}
+          actions={<Button onClick={() => setDetailsDoc(null)}>Fechar</Button>}
+        >
+          <div className="space-y-3 text-sm">
+            <div className="flex items-center gap-2"><span className="text-gray-600">Data/Hora:</span> {new Date(detailsDoc.date).toLocaleString()}</div>
+            <div className="flex items-center gap-2"><span className="text-gray-600">CPF:</span> {detailsDoc.cpf}</div>
+            <div>
+              <div className="mb-1 text-gray-600">Hash:</div>
+              <div className="relative">
+                <input readOnly className="w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-xs" value={detailsDoc.hash} />
+              </div>
+            </div>
+          </div>
+        </Modal>
       )}
     </div>
   )
