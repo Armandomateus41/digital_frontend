@@ -20,8 +20,8 @@ async function handleResponse<T>(response: Response): Promise<T> {
     if (contentType.includes('application/json')) {
       return (await response.json()) as T
     }
-    // @ts-expect-error allow empty body
-    return undefined as T
+    // Quando não houver corpo, retornamos undefined explicitamente tipado
+    return undefined as unknown as T
   }
   const problem = await parseProblem(response)
   if (problem) {

@@ -44,10 +44,10 @@ export default function Signatures() {
     },
   })
 
-  const signMutation = useMutation({
-    mutationFn: async (signatureId: string) => apiPost(`/signatures/${signatureId}/sign`),
-    onSuccess: (_data, _vars, ctx: any) => {
-      if (ctx?.documentId) qc.invalidateQueries({ queryKey: ['doc-signers', ctx.documentId] })
+  const signMutation = useMutation<unknown, Error, { signatureId: string; documentId: string }>({
+    mutationFn: async (vars) => apiPost(`/signatures/${vars.signatureId}/sign`),
+    onSuccess: (_data, vars) => {
+      if (vars?.documentId) qc.invalidateQueries({ queryKey: ['doc-signers', vars.documentId] })
     },
   })
 
@@ -108,7 +108,7 @@ export default function Signatures() {
                     const signers = await listSigners(d.documentId)
                     const firstPending = signers.find((s) => s.status === 'PENDING')
                     if (!firstPending) return alert('Não há assinantes pendentes')
-                    await signMutation.mutateAsync(firstPending.id, { context: { documentId: d.documentId } as any })
+                    await signMutation.mutateAsync({ signatureId: firstPending.id, documentId: d.documentId })
                     alert(`Assinado: ${firstPending.name}`)
                   }}
                 >

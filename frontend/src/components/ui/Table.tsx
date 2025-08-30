@@ -1,4 +1,4 @@
-import { PropsWithChildren } from 'react'
+import { PropsWithChildren, HTMLAttributes } from 'react'
 
 export function Table({ children }: PropsWithChildren) {
   return (
@@ -20,12 +20,23 @@ export function TR({ children }: PropsWithChildren) {
   return <tr className="hover:bg-gray-50">{children}</tr>
 }
 
-export function TH({ children }: PropsWithChildren) {
-  return <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">{children}</th>
+export function TH({ children, className, ...rest }: PropsWithChildren & HTMLAttributes<HTMLTableCellElement>) {
+  return (
+    <th
+      className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600 ${className || ''}`}
+      {...rest}
+    >
+      {children}
+    </th>
+  )
 }
 
-export function TD({ children }: PropsWithChildren) {
-  return <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-900">{children}</td>
+export function TD({ children, className, ...rest }: PropsWithChildren & HTMLAttributes<HTMLTableCellElement>) {
+  return (
+    <td className={`whitespace-nowrap px-4 py-3 text-sm text-gray-900 ${className || ''}`} {...rest}>
+      {children}
+    </td>
+  )
 }
 
 
