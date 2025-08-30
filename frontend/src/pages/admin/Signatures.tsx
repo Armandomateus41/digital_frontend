@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Table, THead, TBody, TR, TH, TD } from '../../components/ui/Table'
 import { apiGet, apiPost } from '../../lib/http'
 import Button from '../../components/ui/Button'
@@ -84,10 +84,11 @@ export default function Signatures() {
               <TD>{d.cpf}</TD>
               <TD className="font-mono truncate max-w-[320px]">{d.hash}</TD>
               <TD className="space-x-2">
-                <Button size="sm" onClick={() => setViewModalDocId(d.documentId)}>Ver assinantes</Button>
+                <Button size="sm" onClick={(e) => { e.stopPropagation(); setViewModalDocId(d.documentId) }}>Ver assinantes</Button>
                 <Button
                   size="sm"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation()
                     setNewName('')
                     setNewCpf('')
                     setAddModal({ documentId: d.documentId })
@@ -98,7 +99,8 @@ export default function Signatures() {
                 <Button
                   size="sm"
                   variant="secondary"
-                  onClick={async () => {
+                  onClick={async (e) => {
+                    e.stopPropagation()
                     const signers = await listSigners(d.documentId)
                     const firstPending = signers.find((s) => s.status === 'PENDING')
                     if (!firstPending) {
@@ -168,12 +170,14 @@ function ViewSignersModal({ documentId, onClose, loader }: { documentId: string;
   const [data, setData] = useState<Signer[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState<string | undefined>()
-  useState(() => {
+  useEffect(() => {
+    let mounted = true
     loader(documentId)
-      .then((r) => setData(r))
-      .catch((e) => setErr(e?.message || 'Erro ao carregar'))
-      .finally(() => setLoading(false))
-  })
+      .then((r) => mounted && setData(r))
+      .catch((e) => mounted && setErr(e?.message || 'Erro ao carregar'))
+      .finally(() => mounted && setLoading(false))
+    return () => { mounted = false }
+  }, [documentId, loader])
   return (
     <Modal open onClose={onClose} title="Assinantes" description={`Documento ${documentId}`}
       actions={<Button onClick={onClose}>Fechar</Button>}>
