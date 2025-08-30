@@ -2,7 +2,7 @@
 
 Uma plataforma moderna e segura para assinatura digital de documentos, desenvolvida com React, TypeScript e NestJS.
 
-## 🚀 Funcionalidades
+## Funcionalidades
 
 - **Login de Usuário**: Autenticação com CPF para usuários finais
 - **Login Administrativo**: Acesso para gestão de documentos e assinaturas
@@ -10,7 +10,7 @@ Uma plataforma moderna e segura para assinatura digital de documentos, desenvolv
 - **Responsivo**: Layout mobile-first otimizado para todos os dispositivos
 - **Segurança**: Validação robusta e tratamento de erros
 
-## 🛠️ Tecnologias
+## Tecnologias
 
 ### Frontend
 - **React 19** + **TypeScript**
@@ -26,7 +26,7 @@ Uma plataforma moderna e segura para assinatura digital de documentos, desenvolv
 - **JWT** para autenticação
 - **Validação** com class-validator
 
-## 📦 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 digital-front/
@@ -43,7 +43,7 @@ digital-front/
 └── tests/             # Testes E2E com Playwright
 ```
 
-## 🚀 Como Executar
+## Como Executar
 
 ### Pré-requisitos
 - Node.js 18+
@@ -68,7 +68,7 @@ pnpm build
 - **Frontend**: http://localhost:5175
 - **Backend (BFF)**: http://localhost:8787
 
-## 🎨 Design System
+## Design System
 
 ### Paleta de Cores
 - **Primary**: `#030213` (cor escura profissional)
@@ -81,7 +81,7 @@ pnpm build
 - **Buttons**: Estados hover e focus bem definidos
 - **Inputs**: Altura de 48px para touch-friendly
 
-## 📱 Páginas
+## Páginas
 
 ### Login de Usuário (`/login`)
 - Autenticação com CPF (formatação automática)
@@ -93,14 +93,14 @@ pnpm build
 - Interface específica para administradores
 - Link de retorno para login de usuário
 
-## 🔒 Segurança
+## Segurança
 
 - Validação de CPF com algoritmo de verificação
 - Sanitização de inputs
 - Tratamento de erros padronizado
 - Headers de segurança configurados
 
-## 📋 Scripts Disponíveis
+## Scripts Disponíveis
 
 ```bash
 # Desenvolvimento
@@ -117,7 +117,7 @@ pnpm test:e2e         # Testes end-to-end com Playwright
 pnpm promote:admin    # Promover usuário a admin
 ```
 
-## 🚀 Deploy
+## Deploy
 
 ### Vercel (Frontend)
 O projeto está configurado para deploy automático no Vercel:
@@ -131,7 +131,7 @@ O projeto está configurado para deploy automático no Vercel:
 - **Output Directory**: `frontend/dist`
 - **Install Command**: `pnpm install`
 
-## 🤝 Contribuição
+## Contribuição
 
 1. Fork o projeto
 2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
@@ -139,14 +139,14 @@ O projeto está configurado para deploy automático no Vercel:
 4. Push para a branch (`git push origin feature/AmazingFeature`)
 5. Abra um Pull Request
 
-## 📄 Licença
+## Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-## 👨‍💻 Autor
+## Autor
 
 **Armando Capita** - [GitHub](https://github.com/Armandomateus41)
 
 ---
 
-Desenvolvido com ❤️ para assinatura digital segura e moderna.
+Projeto desenvolvido para assinatura digital segura e moderna.
