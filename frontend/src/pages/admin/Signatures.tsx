@@ -77,7 +77,7 @@ export default function Signatures() {
         </THead>
         <TBody>
           {data.map((d) => (
-            <TR key={`${d.documentId}-${d.hash}`} onClick={() => setDetailsDoc(d)}>
+            <TR key={`${d.documentId}-${d.hash}`} onClick={() => setDetailsDoc(d)} className="cursor-pointer">
               <TD className="font-mono">{d.documentId}</TD>
               <TD>{d.name}</TD>
               <TD>{new Date(d.date).toLocaleString()}</TD>
@@ -124,7 +124,7 @@ export default function Signatures() {
         <AddSignerModal
           documentId={addModal.documentId}
           onClose={() => setAddModal(null)}
-          onSubmit={async (p) => createSigner.mutateAsync({ documentId: addModal.documentId, name: p.name, cpf: p.cpf })}
+          onSubmit={async (p) => { await createSigner.mutateAsync({ documentId: addModal.documentId, name: p.name, cpf: p.cpf }) }}
           name={newName}
           setName={setNewName}
           cpf={newCpf}
