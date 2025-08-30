@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { Table, THead, TBody, TR, TH, TD } from '../../components/ui/Table'
 import { apiGet, apiPost } from '../../lib/http'
 import Button from '../../components/ui/Button'
+import Modal from '../../components/ui/Modal'
 
 type DocRow = {
   documentId: string
@@ -21,6 +23,11 @@ type Signer = {
 
 export default function Signatures() {
   const qc = useQueryClient()
+  const [viewModalDocId, setViewModalDocId] = useState<string | null>(null)
+  const [addModal, setAddModal] = useState<{ documentId: string } | null>(null)
+  const [signModal, setSignModal] = useState<{ documentId: string; signer?: Signer } | null>(null)
+  const [newName, setNewName] = useState('')
+  const [newCpf, setNewCpf] = useState('')
   const { data, isLoading } = useQuery<DocRow[]>({
     queryKey: ['admin-signatures'],
     queryFn: async () => (await apiGet('/admin/signatures', { cache: 'no-store' })) as DocRow[],
@@ -76,27 +83,13 @@ export default function Signatures() {
               <TD>{d.cpf}</TD>
               <TD className="font-mono truncate max-w-[320px]">{d.hash}</TD>
               <TD className="space-x-2">
+                <Button size="sm" onClick={() => setViewModalDocId(d.documentId)}>Ver assinantes</Button>
                 <Button
                   size="sm"
-                  onClick={async () => {
-                    const signers = await listSigners(d.documentId)
-                    const text = signers
-                      .map((s) => `${s.name} (${s.cpf}) - ${s.status}${s.signedAt ? ` @ ${new Date(s.signedAt).toLocaleString()}` : ''}`)
-                      .join('\n') || 'Sem assinantes'
-                    alert(text)
-                  }}
-                >
-                  Ver assinantes
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={async () => {
-                    const name = prompt('Nome do assinante?')?.trim()
-                    if (!name) return
-                    const cpf = prompt('CPF (somente números)?')?.replace(/\D/g, '')
-                    if (!cpf) return
-                    await createSigner.mutateAsync({ documentId: d.documentId, name, cpf })
-                    alert('Assinante adicionado')
+                  onClick={() => {
+                    setNewName('')
+                    setNewCpf('')
+                    setAddModal({ documentId: d.documentId })
                   }}
                 >
                   Adicionar
@@ -107,9 +100,11 @@ export default function Signatures() {
                   onClick={async () => {
                     const signers = await listSigners(d.documentId)
                     const firstPending = signers.find((s) => s.status === 'PENDING')
-                    if (!firstPending) return alert('Não há assinantes pendentes')
-                    await signMutation.mutateAsync({ signatureId: firstPending.id, documentId: d.documentId })
-                    alert(`Assinado: ${firstPending.name}`)
+                    if (!firstPending) {
+                      setSignModal({ documentId: d.documentId })
+                      return
+                    }
+                    setSignModal({ documentId: d.documentId, signer: firstPending })
                   }}
                 >
                   Assinar (primeiro pendente)
@@ -119,7 +114,125 @@ export default function Signatures() {
           ))}
         </TBody>
       </Table>
+      {viewModalDocId && (
+        <ViewSignersModal documentId={viewModalDocId} onClose={() => setViewModalDocId(null)} loader={listSigners} />
+      )}
+      {addModal && (
+        <AddSignerModal
+          documentId={addModal.documentId}
+          onClose={() => setAddModal(null)}
+          onSubmit={async (p) => createSigner.mutateAsync({ documentId: addModal.documentId, name: p.name, cpf: p.cpf })}
+          name={newName}
+          setName={setNewName}
+          cpf={newCpf}
+          setCpf={setNewCpf}
+        />
+      )}
+      {signModal && (
+        <SignModal
+          signer={signModal.signer}
+          onClose={() => setSignModal(null)}
+          onConfirm={async () => {
+            if (!signModal.signer) return
+            await signMutation.mutateAsync({ signatureId: signModal.signer.id, documentId: signModal.documentId })
+          }}
+        />
+      )}
     </div>
+  )
+}
+
+// Modais
+function ViewSignersModal({ documentId, onClose, loader }: { documentId: string; onClose: () => void; loader: (id: string) => Promise<Signer[]> }) {
+  const [data, setData] = useState<Signer[] | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [err, setErr] = useState<string | undefined>()
+  useState(() => {
+    loader(documentId)
+      .then((r) => setData(r))
+      .catch((e) => setErr(e?.message || 'Erro ao carregar'))
+      .finally(() => setLoading(false))
+  })
+  return (
+    <Modal open onClose={onClose} title="Assinantes" description={`Documento ${documentId}`}
+      actions={<Button onClick={onClose}>Fechar</Button>}>
+      {loading && <div className="text-sm text-gray-600">Carregando...</div>}
+      {err && <div className="text-sm text-red-600">{err}</div>}
+      {!loading && !err && (
+        <div className="max-h-60 overflow-auto text-sm">
+          {data && data.length > 0 ? (
+            <ul className="space-y-2">
+              {data.map((s) => (
+                <li key={s.id} className="flex items-center justify-between">
+                  <span>{s.name} ({s.cpf})</span>
+                  <span className={s.status === 'SIGNED' ? 'text-green-700' : 'text-yellow-700'}>{s.status}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="text-gray-600">Sem assinantes</div>
+          )}
+        </div>
+      )}
+    </Modal>
+  )
+}
+
+function AddSignerModal({ documentId, onClose, onSubmit, name, setName, cpf, setCpf }:
+  { documentId: string; onClose: () => void; onSubmit: (p: { name: string; cpf: string }) => Promise<void>; name: string; setName: (v: string) => void; cpf: string; setCpf: (v: string) => void }) {
+  const [saving, setSaving] = useState(false)
+  const handle = async () => {
+    if (!name?.trim()) return
+    const only = cpf.replace(/\D/g, '')
+    if (only.length !== 11) return
+    setSaving(true)
+    await onSubmit({ name: name.trim(), cpf: only })
+    setSaving(false)
+    onClose()
+  }
+  return (
+    <Modal open onClose={onClose} title="Adicionar assinante" actions={
+      <>
+        <Button variant="secondary" onClick={onClose}>Cancelar</Button>
+        <Button onClick={handle} disabled={saving}>{saving ? 'Salvando...' : 'Adicionar'}</Button>
+      </>
+    }>
+      <div className="space-y-4">
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">Nome</label>
+          <input className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome do assinante" />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">CPF (somente números)</label>
+          <input className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200" value={cpf} onChange={(e) => setCpf(e.target.value)} placeholder="00000000000" />
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
+function SignModal({ onClose, signer, onConfirm }:
+  { onClose: () => void; signer?: Signer; onConfirm: () => Promise<void> }) {
+  const [loading, setLoading] = useState(false)
+  const handle = async () => {
+    setLoading(true)
+    await onConfirm()
+    setLoading(false)
+    onClose()
+  }
+  return (
+    <Modal open onClose={onClose} title="Assinar documento" actions={
+      <>
+        <Button variant="secondary" onClick={onClose}>Cancelar</Button>
+        <Button onClick={handle} disabled={loading}>{loading ? 'Assinando...' : 'Confirmar'}</Button>
+      </>
+    }>
+      {signer ? (
+        <p className="text-sm text-gray-700">Será realizada a assinatura para <strong>{signer.name}</strong> ({signer.cpf}).</p>
+      ) : (
+        <p className="text-sm text-gray-700">Não há assinantes pendentes para este documento.</p>
+      )}
+    </Modal>
   )
 }
 
