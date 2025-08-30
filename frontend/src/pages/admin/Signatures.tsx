@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { Table, THead, TBody, TR, TH, TD } from '../../components/ui/Table'
 import { apiGet, apiPost } from '../../lib/http'
 import Button from '../../components/ui/Button'
@@ -23,6 +24,7 @@ type Signer = {
 
 export default function Signatures() {
   const qc = useQueryClient()
+  const navigate = useNavigate()
   const [viewModalDocId, setViewModalDocId] = useState<string | null>(null)
   const [addModal, setAddModal] = useState<{ documentId: string } | null>(null)
   const [signModal, setSignModal] = useState<{ documentId: string; signer?: Signer } | null>(null)
@@ -63,7 +65,130 @@ export default function Signatures() {
   if (!data || data.length === 0) return <div className="p-6">Nenhum documento enviado ainda.</div>
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo e Título */}
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                    <path d="M10 17l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z" fill="white"/>
+                  </svg>
+                </div>
+                <div>
+                  <h1 className="text-lg font-bold text-gray-900">SecureSign</h1>
+                  <p className="text-xs text-gray-500">Assinatura Digital</p>
+                </div>
+              </div>
+              <div className="border-l border-gray-300 pl-4">
+                <h2 className="text-lg font-semibold text-gray-900">Área Administrativa</h2>
+                <p className="text-sm text-gray-600">Gerenciar documentos e assinaturas</p>
+              </div>
+            </div>
+
+            {/* Botão Sair */}
+            <Button
+              variant="ghost"
+              className="text-gray-600 hover:text-gray-900"
+              onClick={async () => {
+                try {
+                  await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
+                } catch {}
+                localStorage.removeItem('accessToken')
+                navigate('/admin/login', { replace: true })
+              }}
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Sair
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* Navegação */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex space-x-4 mb-6">
+          <Link to="/admin/documents/new">
+            <Button className="bg-white text-gray-900 border border-gray-300 hover:bg-gray-50">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Cadastrar Documento
+            </Button>
+          </Link>
+          <Button variant="ghost" className="text-gray-900">
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Lista de Assinaturas
+          </Button>
+        </div>
+
+        {/* Conteúdo */}
+        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+          <div className="p-6 space-y-6">
+            <Table>
+              <THead>
+                <TR>
+                  <TH>Doc ID</TH>
+                  <TH>Nome</TH>
+                  <TH>Data</TH>
+                  <TH>CPF</TH>
+                  <TH>Hash</TH>
+                  <TH>Ações</TH>
+                </TR>
+              </THead>
+              <TBody>
+                {data.map((d) => (
+                  <TR key={`${d.documentId}-${d.hash}`} onClick={() => setDetailsDoc(d)} className="cursor-pointer">
+                    <TD className="font-mono">{d.documentId}</TD>
+                    <TD>{d.name}</TD>
+                    <TD>{new Date(d.date).toLocaleString()}</TD>
+                    <TD>{d.cpf}</TD>
+                    <TD className="font-mono truncate max-w-[320px]">{d.hash}</TD>
+                    <TD className="space-x-2">
+                      <Button size="sm" onClick={(e) => { e.stopPropagation(); setViewModalDocId(d.documentId) }}>Ver assinantes</Button>
+                      <Button
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setNewName('')
+                          setNewCpf('')
+                          setAddModal({ documentId: d.documentId })
+                        }}
+                      >
+                        Adicionar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={async (e) => {
+                          e.stopPropagation()
+                          const signers = await listSigners(d.documentId)
+                          const firstPending = signers.find((s) => s.status === 'PENDING')
+                          if (!firstPending) {
+                            setSignModal({ documentId: d.documentId })
+                            return
+                          }
+                          setSignModal({ documentId: d.documentId, signer: firstPending })
+                        }}
+                      >
+                        Assinar (primeiro pendente)
+                      </Button>
+                    </TD>
+                  </TR>
+                ))}
+              </TBody>
+            </Table>
+          </div>
+        </div>
+      </div>
       <Table>
         <THead>
           <TR>
