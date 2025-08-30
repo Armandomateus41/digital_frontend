@@ -16,8 +16,12 @@ export function TBody({ children }: PropsWithChildren) {
   return <tbody className="divide-y divide-gray-200 bg-white">{children}</tbody>
 }
 
-export function TR({ children }: PropsWithChildren) {
-  return <tr className="hover:bg-gray-50">{children}</tr>
+export function TR({ children, className, ...rest }: PropsWithChildren & HTMLAttributes<HTMLTableRowElement>) {
+  return (
+    <tr className={`hover:bg-gray-50 ${className || ''}`} {...rest}>
+      {children}
+    </tr>
+  )
 }
 
 export function TH({ children, className, ...rest }: PropsWithChildren & HTMLAttributes<HTMLTableCellElement>) {
