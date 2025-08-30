@@ -6,6 +6,10 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "https://digital-backend-6vr0.onrender.com/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
