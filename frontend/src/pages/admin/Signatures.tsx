@@ -277,7 +277,18 @@ export default function Signatures() {
                           onOpen={(e) => e.stopPropagation()}
                           onViewDocument={() => setDetailsDoc(d)}
                           onVerify={() => { navigator.clipboard.writeText(d.hash).then(() => setToast('Hash copiado para verificação')) }}
-                          onDownload={() => { window.open(`/api/documents/${d.documentId}/certificate`, '_blank') }}
+                          onDownload={async () => {
+                            try {
+                              const resp = (await apiGet<{ url?: string }>(`/documents/${d.documentId}/certificate-url`)) as { url?: string }
+                              if (resp?.url) {
+                                window.open(resp.url, '_blank')
+                              } else {
+                                setToast('Certificado indisponível para este documento')
+                              }
+                            } catch (e: any) {
+                              setToast(e?.problem?.detail || e.message || 'Erro ao obter certificado')
+                            }
+                          }}
                         />
                       </div>
               </TD>
