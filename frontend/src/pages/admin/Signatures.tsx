@@ -25,16 +25,16 @@ function RowActions({ onOpen, onViewDocument, onVerify, onDownload }:
       </Button>
       {open && (
         <div className="absolute right-0 z-20 mt-2 w-56 origin-top-right rounded-md border border-gray-200 bg-white shadow-lg">
-          <div className="py-1 text-sm text-gray-700">
-            <button className="w-full px-4 py-2 text-left hover:bg-gray-50 inline-flex items-center gap-2" onClick={() => { setOpen(false); onViewDocument() }}>
+          <div className="py-1 text-sm text-gray-700 flex flex-col">
+            <button className="flex w-full items-center gap-2 px-4 py-2 text-left hover:bg-gray-50" onClick={() => { setOpen(false); onViewDocument() }}>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
               Visualizar Documento
             </button>
-            <button className="w-full px-4 py-2 text-left hover:bg-gray-50 inline-flex items-center gap-2" onClick={() => { setOpen(false); onVerify() }}>
+            <button className="flex w-full items-center gap-2 px-4 py-2 text-left hover:bg-gray-50" onClick={() => { setOpen(false); onVerify() }}>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 22C7.031 20.578 3.75 16.594 3.75 12V7.5L12 3l8.25 4.5V12c0 4.594-3.281 8.578-8.25 10z"/></svg>
               Verificar Assinatura
             </button>
-            <button className="w-full px-4 py-2 text-left hover:bg-gray-50 inline-flex items-center gap-2" onClick={() => { setOpen(false); onDownload() }}>
+            <button className="flex w-full items-center gap-2 px-4 py-2 text-left hover:bg-gray-50" onClick={() => { setOpen(false); onDownload() }}>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"/></svg>
               Baixar Certificado
             </button>
@@ -241,7 +241,7 @@ export default function Signatures() {
                       <div className="inline-flex items-center gap-1">
                         <Button size="sm" variant="ghost" aria-label="Copiar hash" title="Copiar hash" onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(d.hash).then(() => setToast('Hash copiado para a área de transferência')) }}>
                           <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2M8 16h8a2 2 0 002-2v-2m-6 8H8a2 2 0 01-2-2v-2m8-8h2a2 2 0 012 2v2"/></svg>
-                        </Button>
+                </Button>
                         <RowActions
                           onOpen={(e) => e.stopPropagation()}
                           onViewDocument={() => setDetailsDoc(d)}
@@ -249,9 +249,9 @@ export default function Signatures() {
                           onDownload={() => { window.open(`/api/documents/${d.documentId}/certificate`, '_blank') }}
                         />
                       </div>
-                    </TD>
-                  </TR>
-                ))}
+              </TD>
+            </TR>
+          ))}
         </TBody>
       </Table>
     </div>
