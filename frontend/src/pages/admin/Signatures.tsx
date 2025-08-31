@@ -6,6 +6,7 @@ import { apiGet, apiPost } from '../../lib/http'
 import Button from '../../components/ui/Button'
 import Toast from '../../components/Toast'
 import Modal from '../../components/ui/Modal'
+import Skeleton from '../../components/ui/Skeleton'
 
 type DocRow = {
   documentId: string
@@ -85,7 +86,7 @@ export default function Signatures() {
   const [newCpf, setNewCpf] = useState('')
   const [toast, setToast] = useState<string | undefined>()
   const [mode, setMode] = useState<'cards' | 'table'>('table')
-  const { data, isLoading } = useQuery<DocRow[]>({
+  const { data, isLoading, isError, error, refetch } = useQuery<DocRow[]>({
     queryKey: ['admin-signatures'],
     queryFn: async () => (await apiGet('/admin/signatures', { cache: 'no-store' })) as DocRow[],
     staleTime: 0,
@@ -115,7 +116,40 @@ export default function Signatures() {
     },
   })
 
-  if (isLoading) return <div className="p-6">Carregando...</div>
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-5 w-20" />
+            </div>
+            <div className="space-y-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-10 w-full" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="p-6">
+        <div className="max-w-3xl mx-auto">
+          <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert" aria-live="assertive">
+            Ocorreu um erro ao carregar as assinaturas: {String((error as Error)?.message || 'Erro desconhecido')}
+            <div className="mt-3">
+              <Button onClick={() => refetch()} aria-label="Tentar novamente">Tentar novamente</Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
   if (!data || data.length === 0) return <div className="p-6">Nenhum documento enviado ainda.</div>
 
   return (
@@ -176,12 +210,7 @@ export default function Signatures() {
               <span className="text-sm font-medium text-gray-800">Cadastrar Documento</span>
             </div>
           </Link>
-          <div className="w-full rounded-full border border-gray-300 bg-white px-5 py-2.5 flex items-center justify-center shadow-sm">
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <span className="text-sm font-medium text-gray-800">Lista de Assinaturas</span>
-          </div>
+          {/* Removido item duplicado "Lista de Assinaturas" */}
         </div>
 
         {/* Conteúdo */}
@@ -193,7 +222,7 @@ export default function Signatures() {
               </svg>
               <h3 className="text-base font-semibold text-gray-900">Lista de Assinaturas</h3>
             </div>
-            <span className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700">{data.length} registros</span>
+            <span className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700" aria-label={`Total de registros: ${data.length}`}>{data.length} registros</span>
           </div>
           <div className="px-6 pt-3">
             <div className="mb-4 inline-flex rounded-full border border-gray-300 bg-gray-50 p-1">
