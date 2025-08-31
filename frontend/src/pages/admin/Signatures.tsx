@@ -169,14 +169,14 @@ export default function Signatures() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-2 gap-4 mb-6">
           <Link to="/admin/documents/new" className="block">
-            <div className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 flex items-center justify-center hover:bg-gray-50">
+            <div className="w-full rounded-full border border-gray-300 bg-white px-5 py-2.5 flex items-center justify-center hover:bg-gray-50 shadow-sm">
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
               <span className="text-sm font-medium text-gray-800">Cadastrar Documento</span>
             </div>
           </Link>
-          <div className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 flex items-center justify-center">
+          <div className="w-full rounded-full border border-gray-300 bg-white px-5 py-2.5 flex items-center justify-center shadow-sm">
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
@@ -196,12 +196,12 @@ export default function Signatures() {
             <span className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700">{data.length} registros</span>
           </div>
           <div className="px-6 pt-3">
-            <div className="mb-4 inline-flex rounded-md border border-gray-300 bg-gray-50 p-1">
-              <button onClick={() => setMode('cards')} className={`px-3 py-1.5 text-sm rounded-md inline-flex items-center gap-2 ${mode === 'cards' ? 'bg-white text-gray-900 border border-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>
+            <div className="mb-4 inline-flex rounded-full border border-gray-300 bg-gray-50 p-1">
+              <button onClick={() => setMode('cards')} className={`px-4 py-1.5 text-sm rounded-full inline-flex items-center gap-2 ${mode === 'cards' ? 'bg-white text-gray-900 border border-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h10a2 2 0 012 2v10l-4 6-4-6H5a2 2 0 01-2-2V5a2 2 0 012-2h2z"/></svg>
                 Cards
               </button>
-              <button onClick={() => setMode('table')} className={`px-3 py-1.5 text-sm rounded-md -ml-px inline-flex items-center gap-2 ${mode === 'table' ? 'bg-white text-gray-900 border border-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>
+              <button onClick={() => setMode('table')} className={`px-4 py-1.5 text-sm rounded-full -ml-px inline-flex items-center gap-2 ${mode === 'table' ? 'bg-white text-gray-900 border border-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 6h18M3 14h18M3 18h18"/></svg>
                 Tabela
               </button>
