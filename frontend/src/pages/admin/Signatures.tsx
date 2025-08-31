@@ -23,6 +23,12 @@ type Signer = {
   signedAt?: string
 }
 
+function abbreviateMiddle(value: string, start: number = 8, end: number = 6): string {
+  if (!value) return ''
+  if (value.length <= start + end) return value
+  return `${value.slice(0, start)}…${value.slice(-end)}`
+}
+
 export default function Signatures() {
   const qc = useQueryClient()
   const navigate = useNavigate()
@@ -146,19 +152,19 @@ export default function Signatures() {
             <Table>
               <THead>
                 <TR className="bg-gray-50">
-                  <TH className="w-48">Doc ID</TH>
-                  <TH className="w-64">Nome</TH>
+                  <TH className="w-40">Doc ID</TH>
+                  <TH className="w-60">Nome</TH>
                   <TH className="w-44">Data</TH>
-                  <TH className="w-40">CPF</TH>
-                  <TH className="w-72">Hash</TH>
-                  <TH className="w-60 text-right">Ações</TH>
+                  <TH className="w-36">CPF</TH>
+                  <TH className="w-48">Hash</TH>
+                  <TH className="w-56 text-right">Ações</TH>
                 </TR>
               </THead>
               <TBody>
                 {data.map((d) => (
                   <TR key={`${d.documentId}-${d.hash}`} onClick={() => setDetailsDoc(d)} className="cursor-pointer">
                     <TD className="font-mono text-xs text-gray-700">
-                      <span className="block max-w-[12rem] truncate">{d.documentId}</span>
+                      <span className="block max-w-[10rem] truncate" title={d.documentId}>{abbreviateMiddle(d.documentId)}</span>
                     </TD>
                     <TD className="text-gray-900">
                       <span className="mr-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
@@ -171,7 +177,7 @@ export default function Signatures() {
                     <TD className="text-gray-700">{d.cpf}</TD>
                     <TD>
                       <div className="flex items-center justify-between gap-2">
-                        <span className="block max-w-[18rem] truncate font-mono text-xs text-gray-700">{d.hash}</span>
+                        <span className="block max-w-[10rem] truncate font-mono text-xs text-gray-700" title={d.hash}>{abbreviateMiddle(d.hash)}</span>
                         <div className="shrink-0 space-x-2">
                           <Button
                             size="sm"
