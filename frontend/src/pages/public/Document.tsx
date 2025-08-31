@@ -168,7 +168,7 @@ export default function Document() {
                   />
                   <Button 
                     onClick={onSign}
-                    className="w-full h-12 text-base font-medium rounded-full bg-gray-700 hover:bg-gray-800 text-white shadow-md"
+                    className="w-full h-12 text-base font-medium rounded-full text-white shadow-md bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-purple-300"
                   >
                     Assinar Documento
                   </Button>
