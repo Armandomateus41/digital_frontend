@@ -149,19 +149,19 @@ export default function Signatures() {
             </div>
           </div>
           <div className="p-6">
-            <Table>
-              <THead>
+      <Table>
+        <THead>
                 <TR className="bg-gray-50">
-                  <TH className="w-40">Doc ID</TH>
+                  <TH className="w-36">Doc ID</TH>
                   <TH className="w-60">Nome</TH>
                   <TH className="w-44">Data</TH>
                   <TH className="w-36">CPF</TH>
-                  <TH className="w-48">Hash</TH>
+                  <TH className="w-40">Hash</TH>
                   <TH className="w-56 text-right">Ações</TH>
-                </TR>
-              </THead>
-              <TBody>
-                {data.map((d) => (
+          </TR>
+        </THead>
+        <TBody>
+          {data.map((d) => (
                   <TR key={`${d.documentId}-${d.hash}`} onClick={() => setDetailsDoc(d)} className="cursor-pointer">
                     <TD className="font-mono text-xs text-gray-700">
                       <span className="block max-w-[10rem] truncate" title={d.documentId}>{abbreviateMiddle(d.documentId)}</span>
@@ -177,56 +177,60 @@ export default function Signatures() {
                     <TD className="text-gray-700">{d.cpf}</TD>
                     <TD>
                       <div className="flex items-center justify-between gap-2">
-                        <span className="block max-w-[10rem] truncate font-mono text-xs text-gray-700" title={d.hash}>{abbreviateMiddle(d.hash)}</span>
+                        <span className="block max-w-[9rem] truncate font-mono text-xs text-gray-700" title={d.hash}>{abbreviateMiddle(d.hash)}</span>
                         <div className="shrink-0 space-x-2">
-                          <Button
-                            size="sm"
+                <Button
+                  size="sm"
                             variant="ghost"
                             onClick={(e) => {
                               e.stopPropagation()
                               navigator.clipboard.writeText(d.hash).then(() => setToast('Hash copiado para a área de transferência'))
                             }}
+                            aria-label="Copiar hash"
+                            title="Copiar hash"
                           >
-                            Copiar
-                          </Button>
+                            <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2M8 16h8a2 2 0 002-2v-2m-6 8H8a2 2 0 01-2-2v-2m8-8h2a2 2 0 012 2v2" />
+                            </svg>
+                </Button>
                         </div>
                       </div>
                     </TD>
                     <TD className="space-x-2 text-right">
                       <Button size="sm" onClick={(e) => { e.stopPropagation(); setViewModalDocId(d.documentId) }}>Ver assinantes</Button>
-                      <Button
-                        size="sm"
+                <Button
+                  size="sm"
                         onClick={(e) => {
                           e.stopPropagation()
                           setNewName('')
                           setNewCpf('')
                           setAddModal({ documentId: d.documentId })
-                        }}
-                      >
-                        Adicionar
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="secondary"
+                  }}
+                >
+                  Adicionar
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
                         onClick={async (e) => {
                           e.stopPropagation()
-                          const signers = await listSigners(d.documentId)
-                          const firstPending = signers.find((s) => s.status === 'PENDING')
+                    const signers = await listSigners(d.documentId)
+                    const firstPending = signers.find((s) => s.status === 'PENDING')
                           if (!firstPending) {
                             setSignModal({ documentId: d.documentId })
                             return
                           }
                           setSignModal({ documentId: d.documentId, signer: firstPending })
-                        }}
-                      >
-                        Assinar (primeiro pendente)
-                      </Button>
-                    </TD>
-                  </TR>
-                ))}
-              </TBody>
-            </Table>
-          </div>
+                  }}
+                >
+                  Assinar (primeiro pendente)
+                </Button>
+              </TD>
+            </TR>
+          ))}
+        </TBody>
+      </Table>
+    </div>
         </div>
       </div>
       {viewModalDocId && (
