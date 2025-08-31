@@ -85,6 +85,7 @@ export default function Signatures() {
   const [newName, setNewName] = useState('')
   const [newCpf, setNewCpf] = useState('')
   const [toast, setToast] = useState<string | undefined>()
+  const [confirmExit, setConfirmExit] = useState(false)
   const [mode, setMode] = useState<'cards' | 'table'>('table')
   const { data, isLoading, isError, error, refetch } = useQuery<DocRow[]>({
     queryKey: ['admin-signatures'],
@@ -182,13 +183,7 @@ export default function Signatures() {
             <Button
               variant="ghost"
               className="text-gray-600 hover:text-gray-900"
-              onClick={async () => {
-                try {
-                  await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
-                } catch {}
-                localStorage.removeItem('accessToken')
-                navigate('/admin/login', { replace: true })
-              }}
+              onClick={() => setConfirmExit(true)}
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -381,6 +376,25 @@ export default function Signatures() {
               </div>
             </div>
           </div>
+        </Modal>
+      )}
+      {confirmExit && (
+        <Modal
+          open
+          onClose={() => setConfirmExit(false)}
+          title={<div className="flex items-center gap-2 text-gray-900"><svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M5.07 19h13.86c1.14 0 1.86-1.23 1.29-2.23L13.29 4.77c-.57-1-2-1-2.58 0L3.78 16.77C3.21 17.77 3.93 19 5.07 19z"/></svg><span>Confirmar Saída</span></div>}
+          actions={
+            <>
+              <Button variant="secondary" onClick={() => setConfirmExit(false)}>Cancelar</Button>
+              <Button onClick={async () => {
+                try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }) } catch {}
+                localStorage.removeItem('accessToken')
+                navigate('/admin/login', { replace: true })
+              }}>Sair</Button>
+            </>
+          }
+        >
+          <p className="text-sm text-gray-700">Tem certeza que deseja sair da área administrativa? Todas as alterações não salvas serão perdidas.</p>
         </Modal>
       )}
       <Toast message={toast} type="success" onClose={() => setToast(undefined)} />
