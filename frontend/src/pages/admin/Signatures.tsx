@@ -84,6 +84,7 @@ export default function Signatures() {
   const [newName, setNewName] = useState('')
   const [newCpf, setNewCpf] = useState('')
   const [toast, setToast] = useState<string | undefined>()
+  const [mode, setMode] = useState<'cards' | 'table'>('table')
   const { data, isLoading } = useQuery<DocRow[]>({
     queryKey: ['admin-signatures'],
     queryFn: async () => (await apiGet('/admin/signatures', { cache: 'no-store' })) as DocRow[],
@@ -196,16 +197,17 @@ export default function Signatures() {
           </div>
           <div className="px-6 pt-3">
             <div className="mb-4 inline-flex rounded-md border border-gray-300 bg-gray-50 p-1">
-              <button className="px-3 py-1.5 text-sm rounded-md text-gray-600 hover:text-gray-900 inline-flex items-center gap-2">
+              <button onClick={() => setMode('cards')} className={`px-3 py-1.5 text-sm rounded-md inline-flex items-center gap-2 ${mode === 'cards' ? 'bg-white text-gray-900 border border-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h10a2 2 0 012 2v10l-4 6-4-6H5a2 2 0 01-2-2V5a2 2 0 012-2h2z"/></svg>
                 Cards
               </button>
-              <button className="px-3 py-1.5 text-sm rounded-md bg-white text-gray-900 border border-gray-200 -ml-px inline-flex items-center gap-2">
+              <button onClick={() => setMode('table')} className={`px-3 py-1.5 text-sm rounded-md -ml-px inline-flex items-center gap-2 ${mode === 'table' ? 'bg-white text-gray-900 border border-gray-200' : 'text-gray-600 hover:text-gray-900'}`}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 6h18M3 14h18M3 18h18"/></svg>
                 Tabela
               </button>
             </div>
           </div>
+          {mode === 'table' ? (
           <div className="p-6 pt-0">
       <Table>
         <THead>
@@ -255,6 +257,40 @@ export default function Signatures() {
         </TBody>
       </Table>
     </div>
+          ) : (
+            <div className="p-6 pt-0 space-y-6">
+              {data.map((d, idx) => (
+                <div key={`${d.documentId}-card`} className="rounded-xl border border-gray-200 bg-white shadow-sm p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center rounded-md border border-gray-300 bg-white px-2 py-0.5 text-[11px] font-medium text-gray-700">{`DOC${String(idx + 1).padStart(3, '0')}`}</span>
+                        <span className="inline-flex items-center rounded-full bg-green-100 text-green-800 px-2 py-0.5 text-xs font-medium">Assinado</span>
+                      </div>
+                      <h4 className="text-base font-medium text-gray-900">{d.name}</h4>
+                    </div>
+                  </div>
+                  <div className="mt-3 space-y-2 text-sm text-gray-700">
+                    <div className="flex items-center gap-2"><svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3"/></svg>{formatDate(d.date)}</div>
+                    <div className="flex items-center gap-2"><svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z"/></svg>{formatCpf(d.cpf)}</div>
+                    <div className="flex items-center gap-2"><svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18"/></svg>Hash:</div>
+                  </div>
+                  <div className="mt-3 flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
+                    <span className="flex-1 truncate font-mono text-xs text-gray-800">{d.hash}</span>
+                    <Button size="sm" variant="ghost" aria-label="Copiar hash" title="Copiar hash" onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(d.hash).then(() => setToast('Hash copiado para a área de transferência')) }}>
+                      <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2M8 16h8a2 2 0 002-2v-2m-6 8H8a2 2 0 01-2-2v-2m8-8h2a2 2 0 012 2v2"/></svg>
+                    </Button>
+                    <RowActions
+                      onOpen={(e) => e.stopPropagation()}
+                      onViewDocument={() => setDetailsDoc(d)}
+                      onVerify={() => { navigator.clipboard.writeText(d.hash).then(() => setToast('Hash copiado para verificação')) }}
+                      onDownload={() => { window.open(`/api/documents/${d.documentId}/certificate`, '_blank') }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       {viewModalDocId && (
