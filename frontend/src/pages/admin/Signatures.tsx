@@ -146,18 +146,20 @@ export default function Signatures() {
             <Table>
               <THead>
                 <TR className="bg-gray-50">
-                  <TH className="w-56">Doc ID</TH>
+                  <TH className="w-48">Doc ID</TH>
                   <TH className="w-64">Nome</TH>
-                  <TH className="w-48">Data</TH>
+                  <TH className="w-44">Data</TH>
                   <TH className="w-40">CPF</TH>
                   <TH className="w-72">Hash</TH>
-                  <TH className="w-64 text-right">Ações</TH>
+                  <TH className="w-60 text-right">Ações</TH>
                 </TR>
               </THead>
               <TBody>
                 {data.map((d) => (
                   <TR key={`${d.documentId}-${d.hash}`} onClick={() => setDetailsDoc(d)} className="cursor-pointer">
-                    <TD className="font-mono text-xs text-gray-700">{d.documentId}</TD>
+                    <TD className="font-mono text-xs text-gray-700">
+                      <span className="block max-w-[12rem] truncate">{d.documentId}</span>
+                    </TD>
                     <TD className="text-gray-900">
                       <span className="mr-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
                         style={{ backgroundColor: '#F3F4F6', color: '#374151' }}>
@@ -212,16 +214,6 @@ export default function Signatures() {
                         }}
                       >
                         Assinar (primeiro pendente)
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          navigator.clipboard.writeText(d.hash).then(() => setToast('Hash copiado para a área de transferência'))
-                        }}
-                      >
-                        Copiar hash
                       </Button>
                     </TD>
                   </TR>
