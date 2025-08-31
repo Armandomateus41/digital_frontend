@@ -131,28 +131,36 @@ export default function Signatures() {
         </div>
 
         {/* Conteúdo */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-          <div className="p-6 space-y-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-0 shadow-sm">
+          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M3 12h18M3 17h18" />
+              </svg>
+              <h3 className="text-base font-semibold text-gray-900">Lista de Assinaturas</h3>
+            </div>
+          </div>
+          <div className="p-6">
             <Table>
               <THead>
-                <TR>
-                  <TH>Doc ID</TH>
-                  <TH>Nome</TH>
-                  <TH>Data</TH>
-                  <TH>CPF</TH>
+                <TR className="bg-gray-50">
+                  <TH className="w-56">Doc ID</TH>
+                  <TH className="w-64">Nome</TH>
+                  <TH className="w-48">Data</TH>
+                  <TH className="w-40">CPF</TH>
                   <TH>Hash</TH>
-                  <TH>Ações</TH>
+                  <TH className="w-64 text-right">Ações</TH>
                 </TR>
               </THead>
               <TBody>
                 {data.map((d) => (
                   <TR key={`${d.documentId}-${d.hash}`} onClick={() => setDetailsDoc(d)} className="cursor-pointer">
-                    <TD className="font-mono">{d.documentId}</TD>
-                    <TD>{d.name}</TD>
-                    <TD>{new Date(d.date).toLocaleString()}</TD>
-                    <TD>{d.cpf}</TD>
-                    <TD className="font-mono truncate max-w-[320px]">{d.hash}</TD>
-                    <TD className="space-x-2">
+                    <TD className="font-mono text-xs text-gray-700">{d.documentId}</TD>
+                    <TD className="text-gray-900">{d.name}</TD>
+                    <TD className="text-gray-700">{new Date(d.date).toLocaleString()}</TD>
+                    <TD className="text-gray-700">{d.cpf}</TD>
+                    <TD className="font-mono truncate max-w-[420px] text-gray-700">{d.hash}</TD>
+                    <TD className="space-x-2 text-right">
                       <Button size="sm" onClick={(e) => { e.stopPropagation(); setViewModalDocId(d.documentId) }}>Ver assinantes</Button>
                       <Button
                         size="sm"
