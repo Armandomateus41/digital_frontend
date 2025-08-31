@@ -8,7 +8,7 @@ import Label from '../../components/ui/Label'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card'
 import Logo from '../../components/Logo'
 import Toast from '../../components/Toast'
-import { apiPost } from '../../lib/http'
+import { apiGet, apiPost } from '../../lib/http'
 import { normalizeCPF, isValidCPF } from '../../lib/cpf'
 import { useNavigate, Link } from 'react-router-dom'
 
@@ -51,8 +51,14 @@ export default function LoginUser() {
   const onSubmit = async (values: FormValues) => {
     try {
       const body = { identifier: normalizeCPF(values.cpf), password: values.password }
-      await apiPost('/auth/login', body)
-      navigate('/document', { replace: true })
+      const login = (await apiPost('/auth/login', body)) as any
+      const accessToken: string | undefined = login?.accessToken
+      if (accessToken) {
+        localStorage.setItem('accessToken', accessToken)
+      }
+      const session = (await apiGet('/auth/session')) as any
+      if (session?.role === 'ADMIN') navigate('/admin/documents/new', { replace: true })
+      else navigate('/document', { replace: true })
     } catch (e: any) {
       setToast(e?.problem?.detail || e.message || 'Erro ao fazer login')
     }

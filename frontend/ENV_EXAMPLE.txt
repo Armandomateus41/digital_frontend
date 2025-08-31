@@ -1,0 +1,7 @@
+# Frontend env examples
+# Dev (uses Vite proxy to /api)
+# VITE_BFF_BASE=/api
+
+# Production (call backend directly)
+# Replace with your backend URL
+VITE_BFF_BASE=https://digital-backend-6vr0.onrender.com
