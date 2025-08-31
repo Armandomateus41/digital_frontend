@@ -189,59 +189,6 @@ export default function Signatures() {
           </div>
         </div>
       </div>
-      <Table>
-        <THead>
-          <TR>
-            <TH>Doc ID</TH>
-            <TH>Nome</TH>
-            <TH>Data</TH>
-            <TH>CPF</TH>
-            <TH>Hash</TH>
-            <TH>Ações</TH>
-          </TR>
-        </THead>
-        <TBody>
-          {data.map((d) => (
-            <TR key={`${d.documentId}-${d.hash}`} onClick={() => setDetailsDoc(d)} className="cursor-pointer">
-              <TD className="font-mono">{d.documentId}</TD>
-              <TD>{d.name}</TD>
-              <TD>{new Date(d.date).toLocaleString()}</TD>
-              <TD>{d.cpf}</TD>
-              <TD className="font-mono truncate max-w-[320px]">{d.hash}</TD>
-              <TD className="space-x-2">
-                <Button size="sm" onClick={(e) => { e.stopPropagation(); setViewModalDocId(d.documentId) }}>Ver assinantes</Button>
-                <Button
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setNewName('')
-                    setNewCpf('')
-                    setAddModal({ documentId: d.documentId })
-                  }}
-                >
-                  Adicionar
-                </Button>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={async (e) => {
-                    e.stopPropagation()
-                    const signers = await listSigners(d.documentId)
-                    const firstPending = signers.find((s) => s.status === 'PENDING')
-                    if (!firstPending) {
-                      setSignModal({ documentId: d.documentId })
-                      return
-                    }
-                    setSignModal({ documentId: d.documentId, signer: firstPending })
-                  }}
-                >
-                  Assinar (primeiro pendente)
-                </Button>
-              </TD>
-            </TR>
-          ))}
-        </TBody>
-      </Table>
       {viewModalDocId && (
         <ViewSignersModal documentId={viewModalDocId} onClose={() => setViewModalDocId(null)} loader={listSigners} />
       )}
