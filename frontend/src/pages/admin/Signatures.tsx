@@ -15,6 +15,27 @@ type DocRow = {
   hash: string
 }
 
+function RowActions({ onOpen, onView, onAdd, onSign }:
+  { onOpen: (e: React.MouseEvent) => void; onView: () => void; onAdd: () => void; onSign: () => void }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="relative inline-block text-left">
+      <Button size="sm" variant="ghost" aria-label="Mais ações" title="Mais ações" onClick={(e) => { onOpen(e); setOpen((v) => !v) }}>
+        <svg className="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20"><path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zm6 0a2 2 0 11-4 0 2 2 0 014 0zm6 0a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+      </Button>
+      {open && (
+        <div className="absolute right-0 z-20 mt-2 w-56 origin-top-right rounded-md border border-gray-200 bg-white shadow-lg">
+          <div className="py-1 text-sm text-gray-700">
+            <button className="w-full px-4 py-2 text-left hover:bg-gray-50" onClick={() => { setOpen(false); onView() }}>Ver assinantes</button>
+            <button className="w-full px-4 py-2 text-left hover:bg-gray-50" onClick={() => { setOpen(false); onAdd() }}>Adicionar assinante</button>
+            <button className="w-full px-4 py-2 text-left hover:bg-gray-50" onClick={() => { setOpen(false); onSign() }}>Assinar (primeiro pendente)</button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 type Signer = {
   id: string
   name: string
@@ -27,6 +48,21 @@ function abbreviateMiddle(value: string, start: number = 8, end: number = 6): st
   if (!value) return ''
   if (value.length <= start + end) return value
   return `${value.slice(0, start)}…${value.slice(-end)}`
+}
+
+function formatCpf(cpf: string): string {
+  const only = (cpf || '').replace(/\D/g, '')
+  return only.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
+}
+
+function formatDate(dateIso: string): string {
+  const d = new Date(dateIso)
+  const dd = String(d.getDate()).padStart(2, '0')
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const yyyy = d.getFullYear()
+  const hh = String(d.getHours()).padStart(2, '0')
+  const mi = String(d.getMinutes()).padStart(2, '0')
+  return `${dd}/${mm}/${yyyy}, ${hh}:${mi}`
 }
 
 export default function Signatures() {
@@ -121,21 +157,21 @@ export default function Signatures() {
 
       {/* Navegação */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex space-x-4 mb-6">
-          <Link to="/admin/documents/new">
-            <Button className="bg-white text-gray-900 border border-gray-300 hover:bg-gray-50">
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <Link to="/admin/documents/new" className="block">
+            <div className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 flex items-center justify-center hover:bg-gray-50">
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Cadastrar Documento
-            </Button>
+              <span className="text-sm font-medium text-gray-800">Cadastrar Documento</span>
+            </div>
           </Link>
-          <Button variant="ghost" className="text-gray-900">
+          <div className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 flex items-center justify-center">
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            Lista de Assinaturas
-          </Button>
+            <span className="text-sm font-medium text-gray-800">Lista de Assinaturas</span>
+          </div>
         </div>
 
         {/* Conteúdo */}
@@ -147,87 +183,65 @@ export default function Signatures() {
               </svg>
               <h3 className="text-base font-semibold text-gray-900">Lista de Assinaturas</h3>
             </div>
+            <span className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700">{data.length} registros</span>
           </div>
-          <div className="p-6">
+          <div className="px-6 pt-3">
+            <div className="mb-4 inline-flex rounded-md border border-gray-300 bg-gray-50 p-1">
+              <button className="px-3 py-1.5 text-sm rounded-md text-gray-600 hover:text-gray-900">🏷️ Cards</button>
+              <button className="px-3 py-1.5 text-sm rounded-md bg-white text-gray-900 border border-gray-200 -ml-px">📋 Tabela</button>
+            </div>
+          </div>
+          <div className="p-6 pt-0">
       <Table>
         <THead>
                 <TR className="bg-gray-50">
-                  <TH className="w-36">Doc ID</TH>
-                  <TH className="w-60">Nome</TH>
-                  <TH className="w-44">Data</TH>
+                  <TH className="w-24">ID</TH>
+                  <TH className="w-72">Documento</TH>
+                  <TH className="w-44">Data/Hora</TH>
                   <TH className="w-36">CPF</TH>
-                  <TH className="w-40">Hash</TH>
-                  <TH className="w-56 text-right">Ações</TH>
+                  <TH className="w-56">Hash da Assinatura</TH>
+                  <TH className="w-28 text-right">Ações</TH>
           </TR>
         </THead>
         <TBody>
-          {data.map((d) => (
+          {data.map((d, idx) => (
                   <TR key={`${d.documentId}-${d.hash}`} onClick={() => setDetailsDoc(d)} className="cursor-pointer">
-                    <TD className="font-mono text-xs text-gray-700">
-                      <span className="block max-w-[10rem] truncate" title={d.documentId}>{abbreviateMiddle(d.documentId)}</span>
+                    <TD>
+                      <span className="inline-flex items-center rounded-md border border-gray-300 bg-white px-2 py-0.5 text-[11px] font-medium text-gray-700" title={d.documentId}>
+                        {`DOC${String(idx + 1).padStart(3, '0')}`}
+                      </span>
                     </TD>
                     <TD className="text-gray-900">
-                      <span className="mr-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
-                        style={{ backgroundColor: '#F3F4F6', color: '#374151' }}>
+                      <span className="mr-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style={{ backgroundColor: '#F3F4F6', color: '#374151' }}>
                         {d.cpf ? 'PENDENTE' : 'ASSINADO'}
                       </span>
-                      {d.name}
+                      <span className="inline-block max-w-[18rem] align-middle truncate" title={d.name}>{d.name}</span>
                     </TD>
-                    <TD className="text-gray-700">{new Date(d.date).toLocaleString()}</TD>
-                    <TD className="text-gray-700">{d.cpf}</TD>
+                    <TD className="text-gray-700"><span className="inline-flex items-center gap-1"><svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3"/></svg>{formatDate(d.date)}</span></TD>
+                    <TD className="text-gray-700"><span className="inline-flex items-center gap-1"><svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z"/></svg>{formatCpf(d.cpf)}</span></TD>
                     <TD>
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="block max-w-[9rem] truncate font-mono text-xs text-gray-700" title={d.hash}>{abbreviateMiddle(d.hash)}</span>
-                        <div className="shrink-0 space-x-2">
-                <Button
-                  size="sm"
-                            variant="ghost"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              navigator.clipboard.writeText(d.hash).then(() => setToast('Hash copiado para a área de transferência'))
-                            }}
-                            aria-label="Copiar hash"
-                            title="Copiar hash"
-                          >
-                            <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2M8 16h8a2 2 0 002-2v-2m-6 8H8a2 2 0 01-2-2v-2m8-8h2a2 2 0 012 2v2" />
-                            </svg>
-                </Button>
-                        </div>
+                      <span className="block max-w-[14rem] truncate font-mono text-xs text-gray-700" title={d.hash}># {abbreviateMiddle(d.hash)}</span>
+                    </TD>
+                    <TD className="text-right relative">
+                      <div className="inline-flex items-center gap-1">
+                        <Button size="sm" variant="ghost" aria-label="Copiar hash" title="Copiar hash" onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(d.hash).then(() => setToast('Hash copiado para a área de transferência')) }}>
+                          <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2M8 16h8a2 2 0 002-2v-2m-6 8H8a2 2 0 01-2-2v-2m8-8h2a2 2 0 012 2v2"/></svg>
+                        </Button>
+                        <RowActions
+                          onOpen={(e) => e.stopPropagation()}
+                          onView={() => setViewModalDocId(d.documentId)}
+                          onAdd={() => { setNewName(''); setNewCpf(''); setAddModal({ documentId: d.documentId }) }}
+                          onSign={async () => {
+                            const signers = await listSigners(d.documentId)
+                            const firstPending = signers.find((s) => s.status === 'PENDING')
+                            if (!firstPending) { setSignModal({ documentId: d.documentId }); return }
+                            setSignModal({ documentId: d.documentId, signer: firstPending })
+                          }}
+                        />
                       </div>
                     </TD>
-                    <TD className="space-x-2 text-right">
-                      <Button size="sm" onClick={(e) => { e.stopPropagation(); setViewModalDocId(d.documentId) }}>Ver assinantes</Button>
-                <Button
-                  size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setNewName('')
-                          setNewCpf('')
-                          setAddModal({ documentId: d.documentId })
-                  }}
-                >
-                  Adicionar
-                </Button>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                        onClick={async (e) => {
-                          e.stopPropagation()
-                    const signers = await listSigners(d.documentId)
-                    const firstPending = signers.find((s) => s.status === 'PENDING')
-                          if (!firstPending) {
-                            setSignModal({ documentId: d.documentId })
-                            return
-                          }
-                          setSignModal({ documentId: d.documentId, signer: firstPending })
-                  }}
-                >
-                  Assinar (primeiro pendente)
-                </Button>
-              </TD>
-            </TR>
-          ))}
+                  </TR>
+                ))}
         </TBody>
       </Table>
     </div>
