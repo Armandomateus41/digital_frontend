@@ -2,8 +2,8 @@ import { PropsWithChildren, HTMLAttributes } from 'react'
 
 export function Table({ children }: PropsWithChildren) {
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">{children}</table>
+    <div className="w-full">
+      <table className="w-full table-fixed divide-y divide-gray-200">{children}</table>
     </div>
   )
 }

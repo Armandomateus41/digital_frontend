@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Table, THead, TBody, TR, TH, TD } from '../../components/ui/Table'
 import { apiGet, apiPost } from '../../lib/http'
 import Button from '../../components/ui/Button'
+import Toast from '../../components/Toast'
 import Modal from '../../components/ui/Modal'
 
 type DocRow = {
@@ -31,6 +32,7 @@ export default function Signatures() {
   const [detailsDoc, setDetailsDoc] = useState<DocRow | null>(null)
   const [newName, setNewName] = useState('')
   const [newCpf, setNewCpf] = useState('')
+  const [toast, setToast] = useState<string | undefined>()
   const { data, isLoading } = useQuery<DocRow[]>({
     queryKey: ['admin-signatures'],
     queryFn: async () => (await apiGet('/admin/signatures', { cache: 'no-store' })) as DocRow[],
@@ -148,7 +150,7 @@ export default function Signatures() {
                   <TH className="w-64">Nome</TH>
                   <TH className="w-48">Data</TH>
                   <TH className="w-40">CPF</TH>
-                  <TH>Hash</TH>
+                  <TH className="w-[520px]">Hash</TH>
                   <TH className="w-64 text-right">Ações</TH>
                 </TR>
               </THead>
@@ -156,10 +158,16 @@ export default function Signatures() {
                 {data.map((d) => (
                   <TR key={`${d.documentId}-${d.hash}`} onClick={() => setDetailsDoc(d)} className="cursor-pointer">
                     <TD className="font-mono text-xs text-gray-700">{d.documentId}</TD>
-                    <TD className="text-gray-900">{d.name}</TD>
+                    <TD className="text-gray-900">
+                      <span className="mr-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
+                        style={{ backgroundColor: '#F3F4F6', color: '#374151' }}>
+                        {d.cpf ? 'PENDENTE' : 'ASSINADO'}
+                      </span>
+                      {d.name}
+                    </TD>
                     <TD className="text-gray-700">{new Date(d.date).toLocaleString()}</TD>
                     <TD className="text-gray-700">{d.cpf}</TD>
-                    <TD className="font-mono truncate max-w-[420px] text-gray-700">{d.hash}</TD>
+                    <TD className="font-mono truncate text-gray-700">{d.hash}</TD>
                     <TD className="space-x-2 text-right">
                       <Button size="sm" onClick={(e) => { e.stopPropagation(); setViewModalDocId(d.documentId) }}>Ver assinantes</Button>
                       <Button
@@ -188,6 +196,16 @@ export default function Signatures() {
                         }}
                       >
                         Assinar (primeiro pendente)
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          navigator.clipboard.writeText(d.hash).then(() => setToast('Hash copiado para a área de transferência'))
+                        }}
+                      >
+                        Copiar hash
                       </Button>
                     </TD>
                   </TR>
@@ -236,11 +254,18 @@ export default function Signatures() {
               <div className="mb-1 text-gray-600">Hash:</div>
               <div className="relative">
                 <input readOnly className="w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-xs" value={detailsDoc.hash} />
+                <button
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-blue-700 hover:underline"
+                  onClick={() => navigator.clipboard.writeText(detailsDoc.hash).then(() => setToast('Hash copiado para a área de transferência'))}
+                >
+                  Copiar
+                </button>
               </div>
             </div>
           </div>
         </Modal>
       )}
+      <Toast message={toast} type="success" onClose={() => setToast(undefined)} />
     </div>
   )
 }
