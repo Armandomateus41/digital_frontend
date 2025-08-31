@@ -15,8 +15,8 @@ type DocRow = {
   hash: string
 }
 
-function RowActions({ onOpen, onView, onAdd, onSign }:
-  { onOpen: (e: React.MouseEvent) => void; onView: () => void; onAdd: () => void; onSign: () => void }) {
+function RowActions({ onOpen, onViewDocument, onVerify, onDownload }:
+  { onOpen: (e: React.MouseEvent) => void; onViewDocument: () => void; onVerify: () => void; onDownload: () => void }) {
   const [open, setOpen] = useState(false)
   return (
     <div className="relative inline-block text-left">
@@ -26,9 +26,18 @@ function RowActions({ onOpen, onView, onAdd, onSign }:
       {open && (
         <div className="absolute right-0 z-20 mt-2 w-56 origin-top-right rounded-md border border-gray-200 bg-white shadow-lg">
           <div className="py-1 text-sm text-gray-700">
-            <button className="w-full px-4 py-2 text-left hover:bg-gray-50" onClick={() => { setOpen(false); onView() }}>Ver assinantes</button>
-            <button className="w-full px-4 py-2 text-left hover:bg-gray-50" onClick={() => { setOpen(false); onAdd() }}>Adicionar assinante</button>
-            <button className="w-full px-4 py-2 text-left hover:bg-gray-50" onClick={() => { setOpen(false); onSign() }}>Assinar (primeiro pendente)</button>
+            <button className="w-full px-4 py-2 text-left hover:bg-gray-50 inline-flex items-center gap-2" onClick={() => { setOpen(false); onViewDocument() }}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              Visualizar Documento
+            </button>
+            <button className="w-full px-4 py-2 text-left hover:bg-gray-50 inline-flex items-center gap-2" onClick={() => { setOpen(false); onVerify() }}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 22C7.031 20.578 3.75 16.594 3.75 12V7.5L12 3l8.25 4.5V12c0 4.594-3.281 8.578-8.25 10z"/></svg>
+              Verificar Assinatura
+            </button>
+            <button className="w-full px-4 py-2 text-left hover:bg-gray-50 inline-flex items-center gap-2" onClick={() => { setOpen(false); onDownload() }}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"/></svg>
+              Baixar Certificado
+            </button>
           </div>
         </div>
       )}
@@ -187,8 +196,14 @@ export default function Signatures() {
           </div>
           <div className="px-6 pt-3">
             <div className="mb-4 inline-flex rounded-md border border-gray-300 bg-gray-50 p-1">
-              <button className="px-3 py-1.5 text-sm rounded-md text-gray-600 hover:text-gray-900">🏷️ Cards</button>
-              <button className="px-3 py-1.5 text-sm rounded-md bg-white text-gray-900 border border-gray-200 -ml-px">📋 Tabela</button>
+              <button className="px-3 py-1.5 text-sm rounded-md text-gray-600 hover:text-gray-900 inline-flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h10a2 2 0 012 2v10l-4 6-4-6H5a2 2 0 01-2-2V5a2 2 0 012-2h2z"/></svg>
+                Cards
+              </button>
+              <button className="px-3 py-1.5 text-sm rounded-md bg-white text-gray-900 border border-gray-200 -ml-px inline-flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 6h18M3 14h18M3 18h18"/></svg>
+                Tabela
+              </button>
             </div>
           </div>
           <div className="p-6 pt-0">
@@ -229,14 +244,9 @@ export default function Signatures() {
                         </Button>
                         <RowActions
                           onOpen={(e) => e.stopPropagation()}
-                          onView={() => setViewModalDocId(d.documentId)}
-                          onAdd={() => { setNewName(''); setNewCpf(''); setAddModal({ documentId: d.documentId }) }}
-                          onSign={async () => {
-                            const signers = await listSigners(d.documentId)
-                            const firstPending = signers.find((s) => s.status === 'PENDING')
-                            if (!firstPending) { setSignModal({ documentId: d.documentId }); return }
-                            setSignModal({ documentId: d.documentId, signer: firstPending })
-                          }}
+                          onViewDocument={() => setDetailsDoc(d)}
+                          onVerify={() => { navigator.clipboard.writeText(d.hash).then(() => setToast('Hash copiado para verificação')) }}
+                          onDownload={() => { window.open(`/api/documents/${d.documentId}/certificate`, '_blank') }}
                         />
                       </div>
                     </TD>
