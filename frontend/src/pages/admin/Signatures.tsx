@@ -150,7 +150,7 @@ export default function Signatures() {
                   <TH className="w-64">Nome</TH>
                   <TH className="w-48">Data</TH>
                   <TH className="w-40">CPF</TH>
-                  <TH className="w-[520px]">Hash</TH>
+                  <TH className="w-72">Hash</TH>
                   <TH className="w-64 text-right">Ações</TH>
                 </TR>
               </THead>
@@ -167,7 +167,23 @@ export default function Signatures() {
                     </TD>
                     <TD className="text-gray-700">{new Date(d.date).toLocaleString()}</TD>
                     <TD className="text-gray-700">{d.cpf}</TD>
-                    <TD className="font-mono truncate text-gray-700">{d.hash}</TD>
+                    <TD>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="block max-w-[18rem] truncate font-mono text-xs text-gray-700">{d.hash}</span>
+                        <div className="shrink-0 space-x-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              navigator.clipboard.writeText(d.hash).then(() => setToast('Hash copiado para a área de transferência'))
+                            }}
+                          >
+                            Copiar
+                          </Button>
+                        </div>
+                      </div>
+                    </TD>
                     <TD className="space-x-2 text-right">
                       <Button size="sm" onClick={(e) => { e.stopPropagation(); setViewModalDocId(d.documentId) }}>Ver assinantes</Button>
                       <Button
